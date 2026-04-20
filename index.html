@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Example Cinematic</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@4.0.0/dist/phaser.js"></script>
+    <script>
+        class Scene1 extends Phaser.Scene {
+            constructor() {
+                super('scene1');
+            }
+
+            preload() {
+                this.load.image('marble1', 'assets/marble1.png');
+                this.load.image('marble2', 'assets/marble2.png');
+                this.load.image('marble3', 'assets/marble3.png');
+                this.load.image('watersplash1', 'assets/watersplash1.png');
+                this.load.image('watersplash2', 'assets/watersplash2.png');
+            }
+
+            create() {
+                const centerX = this.cameras.main.centerX;
+                const centerY = this.cameras.main.centerY;
+
+                this.cameras.main.setBackgroundColor('#000000');
+
+                // 三个玻璃球
+                const ball1 = this.add.image(centerX - 220, centerY - 140, 'marble1').setScale(0.16);
+                const ball2 = this.add.image(centerX + 220, centerY - 140, 'marble2').setScale(0.16);
+                const ball3 = this.add.image(centerX, centerY + 180, 'marble3').setScale(0.16);
+
+                // splash 先隐藏
+                const splash1 = this.add.image(centerX, centerY, 'watersplash1')
+                    .setScale(0.10)
+                    .setAlpha(0)
+                    .setDepth(10);
+
+                const splash2 = this.add.image(centerX, centerY, 'watersplash2')
+                    .setScale(0.10)
+                    .setAlpha(0)
+                    .setDepth(11);
+
+                // 标题先隐藏
+                const titleText = this.add.text(centerX, centerY - 10, 'Marble Searealm', {
+                    fontSize: '48px',
+                    color: '#ffffff',
+                    fontStyle: 'bold',
+                    stroke: '#9adfff',
+                    strokeThickness: 4,
+                    align: 'center'
+                }).setOrigin(0.5).setAlpha(0).setDepth(12);
+
+                // marble 持续旋转
+                this.tweens.add({
+                    targets: [ball1, ball2, ball3],
+                    angle: 360,
+                    duration: 2000,
+                    repeat: -1
+                });
+
+                // 三条弧线
+                const curve1 = new Phaser.Curves.QuadraticBezier(
+                    new Phaser.Math.Vector2(centerX - 220, centerY - 140),
+                    new Phaser.Math.Vector2(centerX - 120, centerY - 260),
+                    new Phaser.Math.Vector2(centerX, centerY)
+                );
+
+                const curve2 = new Phaser.Curves.QuadraticBezier(
+                    new Phaser.Math.Vector2(centerX + 220, centerY - 140),
+                    new Phaser.Math.Vector2(centerX + 120, centerY - 260),
+                    new Phaser.Math.Vector2(centerX, centerY)
+                );
+
+                const curve3 = new Phaser.Curves.QuadraticBezier(
+                    new Phaser.Math.Vector2(centerX, centerY + 180),
+                    new Phaser.Math.Vector2(centerX + 160, centerY + 80),
+                    new Phaser.Math.Vector2(centerX, centerY)
+                );
+
+                // ball1 沿弧线移动
+                this.tweens.addCounter({
+                    from: 0,
+                    to: 1,
+                    duration: 1800,
+                    ease: 'Sine.easeInOut',
+                    onUpdate: (tween) => {
+                        const t = tween.getValue();
+                        const point = curve1.getPoint(t);
+                        ball1.setPosition(point.x, point.y);
+                    }
+                });
+
+                // ball2 沿弧线移动
+                this.tweens.addCounter({
+                    from: 0,
+                    to: 1,
+                    duration: 1800,
+                    ease: 'Sine.easeInOut',
+                    onUpdate: (tween) => {
+                        const t = tween.getValue();
+                        const point = curve2.getPoint(t);
+                        ball2.setPosition(point.x, point.y);
+                    }
+                });
+
+                // ball3 沿弧线移动，完成后触发 splash 和标题
+                this.tweens.addCounter({
+                    from: 0,
+                    to: 1,
+                    duration: 1800,
+                    ease: 'Sine.easeInOut',
+                    onUpdate: (tween) => {
+                        const t = tween.getValue();
+                        const point = curve3.getPoint(t);
+                        ball3.setPosition(point.x, point.y);
+                    },
+                    onComplete: () => {
+                        // 三个球消失
+                        ball1.setAlpha(0);
+                        ball2.setAlpha(0);
+                        ball3.setAlpha(0);
+
+                        // 第一张水花出现：watersplash1
+                        this.tweens.add({
+                            targets: splash1,
+                            alpha: 1,
+                            scale: 0.22,
+                            duration: 450,
+                            ease: 'Sine.easeOut'
+                        });
+
+                        this.tweens.add({
+                            targets: splash1,
+                            alpha: 0,
+                            scale: 0.30,
+                            duration: 850,
+                            delay: 500,
+                            ease: 'Sine.easeOut'
+                        });
+
+                        // 第二张水花 + 标题 一起出现
+                        this.tweens.add({
+                            targets: splash2,
+                            alpha: 1,
+                            scale: 0.24,
+                            duration: 500,
+                            delay: 700,
+                            ease: 'Back.Out'
+                        });
+
+                        this.tweens.add({
+                            targets: titleText,
+                            alpha: 1,
+                            y: centerY - 30,
+                            duration: 500,
+                            delay: 700,
+                            ease: 'Sine.easeOut'
+                        });
+
+                        // 第二张水花和标题停留更久后消失
+                        this.tweens.add({
+                            targets: splash2,
+                            alpha: 0,
+                            scale: 0.34,
+                            duration: 1000,
+                            delay: 1800,
+                            ease: 'Sine.easeOut'
+                        });
+
+                        this.tweens.add({
+                            targets: titleText,
+                            alpha: 0,
+                            duration: 1000,
+                            delay: 1800,
+                            ease: 'Sine.easeOut',
+                            onComplete: () => {
+                                this.cameras.main.fadeOut(900, 255, 255, 255);
+                            }
+                        });
+                    }
+                });
+
+                this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.scene.start('scene2');
+                });
+            }
+        }
+
+        class Scene2 extends Phaser.Scene {
+            constructor() {
+                super('scene2');
+            }
+
+            create() {
+                const centerX = this.cameras.main.centerX;
+                const centerY = this.cameras.main.centerY;
+
+                this.cameras.main.setBackgroundColor('#ffffff');
+                this.cameras.main.fadeIn(600, 255, 255, 255);
+
+            }
+        }
+
+        new Phaser.Game({
+            type: Phaser.AUTO,
+            width: 640,
+            height: 480,
+            backgroundColor: '#000000',
+            scene: [Scene1, Scene2]
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
