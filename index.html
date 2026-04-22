@@ -4,20 +4,22 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Example Cinematic</title>
+    <title>Marble Searealm</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@4.0.0/dist/phaser.js"></script>
     <script>
+
         class Scene1 extends Phaser.Scene {
             constructor() {
                 super('scene1');
             }
 
             preload() {
-                this.load.image('marble1', 'assets/marble1.png');
-                this.load.image('marble2', 'assets/marble2.png');
-                this.load.image('marble3', 'assets/marble3.png');
+                this.load.image('marble1',      'assets/marble1.png');
+                this.load.image('marble2',      'assets/marble2.png');
+                this.load.image('marble3',      'assets/marble3.png');
                 this.load.image('watersplash1', 'assets/watersplash1.png');
                 this.load.image('watersplash2', 'assets/watersplash2.png');
+                this.load.audio('sea',          'assets/sea.wav');
             }
 
             create() {
@@ -26,23 +28,18 @@
 
                 this.cameras.main.setBackgroundColor('#000000');
 
-                // 三个玻璃球
+                const sea = this.sound.add('sea', { loop: true, volume: 0.6 });
+                sea.play();
+
                 const ball1 = this.add.image(centerX - 220, centerY - 140, 'marble1').setScale(0.16);
                 const ball2 = this.add.image(centerX + 220, centerY - 140, 'marble2').setScale(0.16);
-                const ball3 = this.add.image(centerX, centerY + 180, 'marble3').setScale(0.16);
+                const ball3 = this.add.image(centerX,       centerY + 180, 'marble3').setScale(0.16);
 
-                // splash 先隐藏
                 const splash1 = this.add.image(centerX, centerY, 'watersplash1')
-                    .setScale(0.10)
-                    .setAlpha(0)
-                    .setDepth(10);
-
+                    .setScale(0.10).setAlpha(0).setDepth(10);
                 const splash2 = this.add.image(centerX, centerY, 'watersplash2')
-                    .setScale(0.10)
-                    .setAlpha(0)
-                    .setDepth(11);
+                    .setScale(0.10).setAlpha(0).setDepth(11);
 
-                // 标题先隐藏
                 const titleText = this.add.text(centerX, centerY - 10, 'Marble Searealm', {
                     fontSize: '48px',
                     color: '#ffffff',
@@ -52,7 +49,14 @@
                     align: 'center'
                 }).setOrigin(0.5).setAlpha(0).setDepth(12);
 
-                // marble 持续旋转
+                const subtitleText = this.add.text(centerX, centerY + 30,
+                    'A marble adventure\nacross the sea realm', {
+                    fontSize: '20px',
+                    color: '#9adfff',
+                    align: 'center',
+                    lineSpacing: 6
+                }).setOrigin(0.5).setAlpha(0).setDepth(12);
+
                 this.tweens.add({
                     targets: [ball1, ball2, ball3],
                     angle: 360,
@@ -60,129 +64,85 @@
                     repeat: -1
                 });
 
-                // 三条弧线
                 const curve1 = new Phaser.Curves.QuadraticBezier(
                     new Phaser.Math.Vector2(centerX - 220, centerY - 140),
                     new Phaser.Math.Vector2(centerX - 120, centerY - 260),
                     new Phaser.Math.Vector2(centerX, centerY)
                 );
-
                 const curve2 = new Phaser.Curves.QuadraticBezier(
                     new Phaser.Math.Vector2(centerX + 220, centerY - 140),
                     new Phaser.Math.Vector2(centerX + 120, centerY - 260),
                     new Phaser.Math.Vector2(centerX, centerY)
                 );
-
                 const curve3 = new Phaser.Curves.QuadraticBezier(
-                    new Phaser.Math.Vector2(centerX, centerY + 180),
+                    new Phaser.Math.Vector2(centerX,       centerY + 180),
                     new Phaser.Math.Vector2(centerX + 160, centerY + 80),
                     new Phaser.Math.Vector2(centerX, centerY)
                 );
 
-                // ball1 沿弧线移动
                 this.tweens.addCounter({
-                    from: 0,
-                    to: 1,
-                    duration: 1800,
-                    ease: 'Sine.easeInOut',
+                    from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
                     onUpdate: (tween) => {
-                        const t = tween.getValue();
-                        const point = curve1.getPoint(t);
-                        ball1.setPosition(point.x, point.y);
+                        const p = curve1.getPoint(tween.getValue());
+                        ball1.setPosition(p.x, p.y);
                     }
                 });
 
-                // ball2 沿弧线移动
                 this.tweens.addCounter({
-                    from: 0,
-                    to: 1,
-                    duration: 1800,
-                    ease: 'Sine.easeInOut',
+                    from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
                     onUpdate: (tween) => {
-                        const t = tween.getValue();
-                        const point = curve2.getPoint(t);
-                        ball2.setPosition(point.x, point.y);
+                        const p = curve2.getPoint(tween.getValue());
+                        ball2.setPosition(p.x, p.y);
                     }
                 });
 
-                // ball3 沿弧线移动，完成后触发 splash 和标题
                 this.tweens.addCounter({
-                    from: 0,
-                    to: 1,
-                    duration: 1800,
-                    ease: 'Sine.easeInOut',
+                    from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
                     onUpdate: (tween) => {
-                        const t = tween.getValue();
-                        const point = curve3.getPoint(t);
-                        ball3.setPosition(point.x, point.y);
+                        const p = curve3.getPoint(tween.getValue());
+                        ball3.setPosition(p.x, p.y);
                     },
                     onComplete: () => {
-                        // 三个球消失
                         ball1.setAlpha(0);
                         ball2.setAlpha(0);
                         ball3.setAlpha(0);
 
-                        // 第一张水花出现：watersplash1
                         this.tweens.add({
-                            targets: splash1,
-                            alpha: 1,
-                            scale: 0.22,
-                            duration: 450,
-                            ease: 'Sine.easeOut'
+                            targets: splash1, alpha: 1, scale: 0.22,
+                            duration: 450, ease: 'Sine.easeOut'
                         });
-
                         this.tweens.add({
-                            targets: splash1,
-                            alpha: 0,
-                            scale: 0.30,
-                            duration: 850,
-                            delay: 500,
-                            ease: 'Sine.easeOut'
+                            targets: splash1, alpha: 0, scale: 0.30,
+                            duration: 850, delay: 500, ease: 'Sine.easeOut'
                         });
-
-                        // 第二张水花 + 标题 一起出现
                         this.tweens.add({
-                            targets: splash2,
-                            alpha: 1,
-                            scale: 0.24,
-                            duration: 500,
-                            delay: 700,
-                            ease: 'Back.Out'
+                            targets: splash2, alpha: 1, scale: 0.24,
+                            duration: 500, delay: 700, ease: 'Back.Out'
                         });
-
                         this.tweens.add({
-                            targets: titleText,
-                            alpha: 1,
-                            y: centerY - 30,
-                            duration: 500,
-                            delay: 700,
-                            ease: 'Sine.easeOut'
+                            targets: titleText, alpha: 1, y: centerY - 30,
+                            duration: 500, delay: 700, ease: 'Sine.easeOut'
                         });
-
-                        // 第二张水花和标题停留更久后消失
                         this.tweens.add({
-                            targets: splash2,
-                            alpha: 0,
-                            scale: 0.34,
-                            duration: 1000,
-                            delay: 1800,
-                            ease: 'Sine.easeOut'
+                            targets: subtitleText, alpha: 1, y: centerY + 20,
+                            duration: 500, delay: 900, ease: 'Sine.easeOut'
                         });
-
                         this.tweens.add({
-                            targets: titleText,
-                            alpha: 0,
-                            duration: 1000,
-                            delay: 1800,
-                            ease: 'Sine.easeOut',
+                            targets: splash2, alpha: 0, scale: 0.34,
+                            duration: 1000, delay: 1800, ease: 'Sine.easeOut'
+                        });
+                        this.tweens.add({
+                            targets: [titleText, subtitleText], alpha: 0,
+                            duration: 1000, delay: 1800, ease: 'Sine.easeOut',
                             onComplete: () => {
-                                this.cameras.main.fadeOut(900, 255, 255, 255);
+                                this.cameras.main.fadeOut(900, 0, 0, 0);
                             }
                         });
                     }
                 });
 
                 this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.sound.stopAll();
                     this.scene.start('scene2');
                 });
             }
@@ -193,13 +153,255 @@
                 super('scene2');
             }
 
+            preload() {
+                this.load.image('marble1', 'assets/marble1.png');
+                this.load.image('marble2', 'assets/marble2.png');
+                this.load.image('marble3', 'assets/marble3.png');
+                this.load.audio('soda',    'assets/soda.wav');
+            }
+
             create() {
-                const centerX = this.cameras.main.centerX;
-                const centerY = this.cameras.main.centerY;
+                const W  = this.cameras.main.width;
+                const H  = this.cameras.main.height;
+                const cx = W / 2;
 
-                this.cameras.main.setBackgroundColor('#ffffff');
-                this.cameras.main.fadeIn(600, 255, 255, 255);
+                this.cameras.main.setBackgroundColor('#000000');
+                this.cameras.main.fadeIn(600, 0, 0, 0);
 
+                const soda = this.sound.add('soda', { loop: true, volume: 0.6 });
+                soda.play();
+
+                const gfx = this.add.graphics();
+
+                gfx.lineStyle(2, 0x7ec8e3, 0.4);
+                gfx.beginPath();
+                gfx.moveTo(40, 110);
+                gfx.lineTo(W - 40, 110);
+                gfx.strokePath();
+
+                gfx.beginPath();
+                gfx.moveTo(40, H - 30);
+                gfx.lineTo(W - 40, H - 30);
+                gfx.strokePath();
+
+                gfx.lineStyle(1.5, 0x9adfff, 0.25);
+                gfx.strokeCircle(60, 60, 40);
+                gfx.strokeCircle(W - 60, H - 60, 40);
+
+                const title = this.add.text(52, 72, 'Main Menu', {
+                    fontSize: '32px',
+                    fontFamily: 'Georgia, serif',
+                    color: '#7ec8e3',
+                    fontStyle: 'bold',
+                }).setAlpha(0);
+
+                this.tweens.add({
+                    targets: title, alpha: 1,
+                    duration: 600, delay: 200, ease: 'Sine.easeOut'
+                });
+
+                const menuItems = [
+                    { label: 'Begin',    side: 'left',  marble: 'marble1' },
+                    { label: 'Memories', side: 'right', marble: 'marble2' },
+                    { label: 'Settings', side: 'left',  marble: 'marble3' },
+                    { label: 'Exit',     side: 'right', marble: 'marble1' },
+                ];
+                const rowYs = [175, 250, 325, 400];
+
+                menuItems.forEach((item, i) => {
+                    const delay  = 400 + i * 150;
+                    const y      = rowYs[i];
+                    const isLeft = item.side === 'left';
+
+                    const txt = this.add.text(
+                        isLeft ? -200 : W + 200,
+                        y,
+                        item.label,
+                        { fontSize: '22px', fontFamily: 'Georgia, serif', color: '#9ad4e8' }
+                    ).setOrigin(isLeft ? 1 : 0, 0.5).setAlpha(0);
+
+                    this.tweens.add({
+                        targets: txt,
+                        x: isLeft ? cx - 60 : cx + 60,
+                        alpha: 1,
+                        duration: 500,
+                        delay,
+                        ease: 'Sine.easeOut'
+                    });
+
+                    const ballStartX = isLeft ? W + 80 : -80;
+                    const ball = this.add.image(ballStartX, y, item.marble)
+                        .setScale(0.09).setAlpha(0);
+
+                    this.tweens.add({
+                        targets: ball, x: cx, alpha: 1,
+                        duration: 500, delay, ease: 'Sine.easeOut'
+                    });
+
+                    this.time.delayedCall(delay + 520, () => {
+                        this.tweens.add({
+                            targets: ball, y: y + 6, duration: 900,
+                            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+                        });
+                    });
+
+                    ball.setInteractive();
+                    ball.on('pointerover', () => {
+                        this.tweens.add({ targets: ball, scaleX: 0.11, scaleY: 0.11, duration: 150 });
+                        txt.setColor('#ffffff');
+                    });
+                    ball.on('pointerout', () => {
+                        this.tweens.add({ targets: ball, scaleX: 0.09, scaleY: 0.09, duration: 150 });
+                        txt.setColor('#9ad4e8');
+                    });
+
+                    if (item.label === 'Begin') {
+                        ball.on('pointerdown', () => {
+                            this.sound.stopAll();
+                            this.cameras.main.fadeOut(600, 0, 0, 0);
+                        });
+                        txt.setInteractive();
+                        txt.on('pointerdown', () => {
+                            this.sound.stopAll();
+                            this.cameras.main.fadeOut(600, 0, 0, 0);
+                        });
+                    }
+                });
+
+                this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.scene.start('scene3');
+                });
+            }
+        }
+
+        class Scene3 extends Phaser.Scene {
+            constructor() {
+                super('scene3');
+            }
+
+            preload() {
+                this.load.image('marble1', 'assets/marble1.png');
+                this.load.image('marble2', 'assets/marble2.png');
+                this.load.image('marble3', 'assets/marble3.png');
+                this.load.audio('soda',    'assets/soda.wav');
+            }
+
+            create() {
+                const W  = this.cameras.main.width;
+                const H  = this.cameras.main.height;
+                const cx = W / 2;
+                const cy = H / 2;
+
+                this.cameras.main.setBackgroundColor('#000000');
+                this.cameras.main.fadeIn(800, 0, 0, 0);
+
+                const soda = this.sound.add('soda', { loop: true, volume: 0.4 });
+                soda.play();
+
+                const bg = this.add.graphics();
+
+                bg.lineStyle(1, 0x1a4a9a, 0.3);
+                bg.fillStyle(0x071a3e, 0.5);
+                bg.fillCircle(cx, cy, 180);
+                bg.strokeCircle(cx, cy, 180);
+
+                bg.lineStyle(1, 0x7ec8e3, 0.2);
+                bg.strokeCircle(cx, cy, 210);
+
+                bg.fillStyle(0x7ec8e3, 0.08);
+                bg.fillRect(20, 20, 50, 50);
+                bg.fillRect(W - 70, 20, 50, 50);
+                bg.fillRect(20, H - 70, 50, 50);
+                bg.fillRect(W - 70, H - 70, 50, 50);
+
+                const heading = this.add.text(cx, 60, 'Stage 1', {
+                    fontSize: '36px',
+                    fontFamily: 'Georgia, serif',
+                    color: '#7ec8e3',
+                    fontStyle: 'bold',
+                    stroke: '#1a4a9a',
+                    strokeThickness: 3,
+                }).setOrigin(0.5).setAlpha(0);
+
+                const desc = this.add.text(cx, H - 60,
+                    'Collect all marbles to proceed\nClick a marble to launch!', {
+                    fontSize: '16px',
+                    fontFamily: 'Georgia, serif',
+                    color: '#9ad4e8',
+                    align: 'center',
+                    lineSpacing: 6,
+                }).setOrigin(0.5).setAlpha(0);
+
+                this.tweens.add({
+                    targets: heading, alpha: 1, y: 70,
+                    duration: 700, delay: 300, ease: 'Sine.easeOut'
+                });
+                this.tweens.add({
+                    targets: desc, alpha: 1,
+                    duration: 700, delay: 500, ease: 'Sine.easeOut'
+                });
+
+                const marbleDefs = [
+                    { key: 'marble1', startAngle: 0   },
+                    { key: 'marble2', startAngle: 120 },
+                    { key: 'marble3', startAngle: 240 },
+                ];
+                const orbitR = 130;
+
+                const marbleObjs = marbleDefs.map((m, idx) => {
+                    const rad = Phaser.Math.DegToRad(m.startAngle);
+                    const img = this.add.image(
+                        cx + orbitR * Math.cos(rad),
+                        cy + orbitR * Math.sin(rad),
+                        m.key
+                    ).setScale(0).setAlpha(0);
+
+                    this.tweens.add({
+                        targets: img, scaleX: 0.14, scaleY: 0.14, alpha: 1,
+                        duration: 500, delay: 600 + idx * 200, ease: 'Back.Out'
+                    });
+
+                    img.setInteractive();
+                    img.on('pointerover', () => {
+                        this.tweens.add({ targets: img, scaleX: 0.17, scaleY: 0.17, duration: 120 });
+                    });
+                    img.on('pointerout', () => {
+                        this.tweens.add({ targets: img, scaleX: 0.14, scaleY: 0.14, duration: 120 });
+                    });
+
+                    return { img, startAngle: m.startAngle };
+                });
+
+                let orbitAngle = 0;
+                this.events.on('update', (time, delta) => {
+                    orbitAngle += delta * 0.04;
+                    marbleObjs.forEach((m) => {
+                        const rad = Phaser.Math.DegToRad(m.startAngle + orbitAngle);
+                        m.img.setPosition(
+                            cx + orbitR * Math.cos(rad),
+                            cy + orbitR * Math.sin(rad)
+                        );
+                        m.img.angle += delta * 0.1;
+                    });
+                });
+
+                const backBtn = this.add.text(cx, H - 20, '← Back to Menu', {
+                    fontSize: '14px',
+                    fontFamily: 'Georgia, serif',
+                    color: '#556677',
+                }).setOrigin(0.5).setAlpha(0).setInteractive();
+
+                this.tweens.add({ targets: backBtn, alpha: 1, duration: 600, delay: 1000 });
+
+                backBtn.on('pointerover', () => backBtn.setColor('#9ad4e8'));
+                backBtn.on('pointerout',  () => backBtn.setColor('#556677'));
+                backBtn.on('pointerdown', () => {
+                    this.sound.stopAll();
+                    this.cameras.main.fadeOut(600, 0, 0, 0);
+                    this.cameras.main.once('camerafadeoutcomplete', () => {
+                        this.scene.start('scene2');
+                    });
+                });
             }
         }
 
@@ -208,10 +410,11 @@
             width: 640,
             height: 480,
             backgroundColor: '#000000',
-            scene: [Scene1, Scene2]
+            scene: [Scene1, Scene2, Scene3]
         });
+
     </script>
 </head>
-<body>
+<body style="margin:0;background:#000;">
 </body>
 </html>
