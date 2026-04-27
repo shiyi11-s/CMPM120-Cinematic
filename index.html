@@ -28,122 +28,132 @@
 
                 this.cameras.main.setBackgroundColor('#000000');
 
-                const sea = this.sound.add('sea', { loop: true, volume: 0.6 });
-                sea.play();
-
-                const ball1 = this.add.image(centerX - 220, centerY - 140, 'marble1').setScale(0.16);
-                const ball2 = this.add.image(centerX + 220, centerY - 140, 'marble2').setScale(0.16);
-                const ball3 = this.add.image(centerX,       centerY + 180, 'marble3').setScale(0.16);
-
-                const splash1 = this.add.image(centerX, centerY, 'watersplash1')
-                    .setScale(0.10).setAlpha(0).setDepth(10);
-                const splash2 = this.add.image(centerX, centerY, 'watersplash2')
-                    .setScale(0.10).setAlpha(0).setDepth(11);
-
-                const titleText = this.add.text(centerX, centerY - 10, 'Marble Searealm', {
-                    fontSize: '48px',
+                const clickText = this.add.text(centerX, centerY, 'A marble drifts into the forgotten sea...\nYour journey begins here\n Click to Start', {
+                    fontSize: '32px',
                     color: '#ffffff',
-                    fontStyle: 'bold',
-                    stroke: '#9adfff',
-                    strokeThickness: 4,
-                    align: 'center'
-                }).setOrigin(0.5).setAlpha(0).setDepth(12);
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
 
-                const subtitleText = this.add.text(centerX, centerY + 30,
-                    'A marble adventure\nacross the sea realm', {
-                    fontSize: '20px',
-                    color: '#9adfff',
-                    align: 'center',
-                    lineSpacing: 6
-                }).setOrigin(0.5).setAlpha(0).setDepth(12);
+                this.input.once('pointerdown', () => {
+                    clickText.destroy();
 
-                this.tweens.add({
-                    targets: [ball1, ball2, ball3],
-                    angle: 360,
-                    duration: 2000,
-                    repeat: -1
-                });
+                    const sea = this.sound.add('sea', { loop: true, volume: 0.6 });
+                    sea.play();
 
-                const curve1 = new Phaser.Curves.QuadraticBezier(
-                    new Phaser.Math.Vector2(centerX - 220, centerY - 140),
-                    new Phaser.Math.Vector2(centerX - 120, centerY - 260),
-                    new Phaser.Math.Vector2(centerX, centerY)
-                );
-                const curve2 = new Phaser.Curves.QuadraticBezier(
-                    new Phaser.Math.Vector2(centerX + 220, centerY - 140),
-                    new Phaser.Math.Vector2(centerX + 120, centerY - 260),
-                    new Phaser.Math.Vector2(centerX, centerY)
-                );
-                const curve3 = new Phaser.Curves.QuadraticBezier(
-                    new Phaser.Math.Vector2(centerX,       centerY + 180),
-                    new Phaser.Math.Vector2(centerX + 160, centerY + 80),
-                    new Phaser.Math.Vector2(centerX, centerY)
-                );
+                    const ball1 = this.add.image(centerX - 220, centerY - 140, 'marble1').setScale(0.16);
+                    const ball2 = this.add.image(centerX + 220, centerY - 140, 'marble2').setScale(0.16);
+                    const ball3 = this.add.image(centerX,       centerY + 180, 'marble3').setScale(0.16);
 
-                this.tweens.addCounter({
-                    from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
-                    onUpdate: (tween) => {
-                        const p = curve1.getPoint(tween.getValue());
-                        ball1.setPosition(p.x, p.y);
-                    }
-                });
+                    const splash1 = this.add.image(centerX, centerY, 'watersplash1')
+                        .setScale(0.10).setAlpha(0).setDepth(10);
+                    const splash2 = this.add.image(centerX, centerY, 'watersplash2')
+                        .setScale(0.10).setAlpha(0).setDepth(11);
 
-                this.tweens.addCounter({
-                    from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
-                    onUpdate: (tween) => {
-                        const p = curve2.getPoint(tween.getValue());
-                        ball2.setPosition(p.x, p.y);
-                    }
-                });
+                    const titleText = this.add.text(centerX, centerY - 10, 'Marble Searealm', {
+                        fontSize: '48px',
+                        color: '#ffffff',
+                        fontStyle: 'bold',
+                        stroke: '#9adfff',
+                        strokeThickness: 4,
+                        align: 'center'
+                    }).setOrigin(0.5).setAlpha(0).setDepth(12);
 
-                this.tweens.addCounter({
-                    from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
-                    onUpdate: (tween) => {
-                        const p = curve3.getPoint(tween.getValue());
-                        ball3.setPosition(p.x, p.y);
-                    },
-                    onComplete: () => {
-                        ball1.setAlpha(0);
-                        ball2.setAlpha(0);
-                        ball3.setAlpha(0);
+                    const subtitleText = this.add.text(centerX, centerY + 30,
+                        'A marble adventure\nacross the sea realm', {
+                        fontSize: '20px',
+                        color: '#9adfff',
+                        align: 'center',
+                        lineSpacing: 6
+                    }).setOrigin(0.5).setAlpha(0).setDepth(12);
 
-                        this.tweens.add({
-                            targets: splash1, alpha: 1, scale: 0.22,
-                            duration: 450, ease: 'Sine.easeOut'
-                        });
-                        this.tweens.add({
-                            targets: splash1, alpha: 0, scale: 0.30,
-                            duration: 850, delay: 500, ease: 'Sine.easeOut'
-                        });
-                        this.tweens.add({
-                            targets: splash2, alpha: 1, scale: 0.24,
-                            duration: 500, delay: 700, ease: 'Back.Out'
-                        });
-                        this.tweens.add({
-                            targets: titleText, alpha: 1, y: centerY - 30,
-                            duration: 500, delay: 700, ease: 'Sine.easeOut'
-                        });
-                        this.tweens.add({
-                            targets: subtitleText, alpha: 1, y: centerY + 20,
-                            duration: 500, delay: 900, ease: 'Sine.easeOut'
-                        });
-                        this.tweens.add({
-                            targets: splash2, alpha: 0, scale: 0.34,
-                            duration: 1000, delay: 1800, ease: 'Sine.easeOut'
-                        });
-                        this.tweens.add({
-                            targets: [titleText, subtitleText], alpha: 0,
-                            duration: 1000, delay: 1800, ease: 'Sine.easeOut',
-                            onComplete: () => {
-                                this.cameras.main.fadeOut(900, 0, 0, 0);
-                            }
-                        });
-                    }
-                });
+                    this.tweens.add({
+                        targets: [ball1, ball2, ball3],
+                        angle: 360,
+                        duration: 2000,
+                        repeat: -1
+                    });
 
-                this.cameras.main.once('camerafadeoutcomplete', () => {
-                    this.sound.stopAll();
-                    this.scene.start('scene2');
+                    const curve1 = new Phaser.Curves.QuadraticBezier(
+                        new Phaser.Math.Vector2(centerX - 220, centerY - 140),
+                        new Phaser.Math.Vector2(centerX - 120, centerY - 260),
+                        new Phaser.Math.Vector2(centerX, centerY)
+                    );
+                    const curve2 = new Phaser.Curves.QuadraticBezier(
+                        new Phaser.Math.Vector2(centerX + 220, centerY - 140),
+                        new Phaser.Math.Vector2(centerX + 120, centerY - 260),
+                        new Phaser.Math.Vector2(centerX, centerY)
+                    );
+                    const curve3 = new Phaser.Curves.QuadraticBezier(
+                        new Phaser.Math.Vector2(centerX,       centerY + 180),
+                        new Phaser.Math.Vector2(centerX + 160, centerY + 80),
+                        new Phaser.Math.Vector2(centerX, centerY)
+                    );
+
+                    this.tweens.addCounter({
+                        from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
+                        onUpdate: (tween) => {
+                            const p = curve1.getPoint(tween.getValue());
+                            ball1.setPosition(p.x, p.y);
+                        }
+                    });
+
+                    this.tweens.addCounter({
+                        from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
+                        onUpdate: (tween) => {
+                            const p = curve2.getPoint(tween.getValue());
+                            ball2.setPosition(p.x, p.y);
+                        }
+                    });
+
+                    this.tweens.addCounter({
+                        from: 0, to: 1, duration: 1800, ease: 'Sine.easeInOut',
+                        onUpdate: (tween) => {
+                            const p = curve3.getPoint(tween.getValue());
+                            ball3.setPosition(p.x, p.y);
+                        },
+                        onComplete: () => {
+                            ball1.setAlpha(0);
+                            ball2.setAlpha(0);
+                            ball3.setAlpha(0);
+
+                            this.tweens.add({
+                                targets: splash1, alpha: 1, scale: 0.22,
+                                duration: 450, ease: 'Sine.easeOut'
+                            });
+                            this.tweens.add({
+                                targets: splash1, alpha: 0, scale: 0.30,
+                                duration: 850, delay: 500, ease: 'Sine.easeOut'
+                            });
+                            this.tweens.add({
+                                targets: splash2, alpha: 1, scale: 0.24,
+                                duration: 500, delay: 700, ease: 'Back.Out'
+                            });
+                            this.tweens.add({
+                                targets: titleText, alpha: 1, y: centerY - 30,
+                                duration: 500, delay: 700, ease: 'Sine.easeOut'
+                            });
+                            this.tweens.add({
+                                targets: subtitleText, alpha: 1, y: centerY + 20,
+                                duration: 500, delay: 900, ease: 'Sine.easeOut'
+                            });
+                            this.tweens.add({
+                                targets: splash2, alpha: 0, scale: 0.34,
+                                duration: 1000, delay: 1800, ease: 'Sine.easeOut'
+                            });
+                            this.tweens.add({
+                                targets: [titleText, subtitleText], alpha: 0,
+                                duration: 1000, delay: 1800, ease: 'Sine.easeOut',
+                                onComplete: () => {
+                                    this.cameras.main.fadeOut(900, 0, 0, 0);
+                                }
+                            });
+                        }
+                    });
+
+                    this.cameras.main.once('camerafadeoutcomplete', () => {
+                        this.sound.stopAll();
+                        this.scene.start('scene2');
+                    });
                 });
             }
         }
@@ -410,7 +420,7 @@
             width: 640,
             height: 480,
             backgroundColor: '#000000',
-            scene: [Scene1, Scene2, Scene3]
+            scene: [Scene1, Scene2, Scene3],
         });
 
     </script>
